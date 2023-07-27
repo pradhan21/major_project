@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "788317225807",
+    "firebase_url": "https://clever-obelisk-381808-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "clever-obelisk-381808",
+    "storage_bucket": "clever-obelisk-381808.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788317225807:android:1f1d22f718b770f3e0fb3a",
+        "android_client_info": {
+          "package_name": "com.example.subscription"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "788317225807-dv09df0t6iphvb6uucemq1geh27k7mib.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSiJm75RvPYctV4XHXImx4oHPdMpsiHJo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "788317225807-dv09df0t6iphvb6uucemq1geh27k7mib.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
