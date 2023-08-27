@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Make an HTTP request to the backend server
     // final url = 'http://127.0.0.1:8000/api/user/register/';
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/user/register/'),
+      Uri.parse('http://192.168.203.233:8000/api/user/register/'),
       body: <String, String>{
         'email': email,
         'username': username,
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) Navigator.pop(context);
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/user/login/'),
+        Uri.parse('http://192.168.203.233:8000/api/user/login/'),
         body: <String, String>{
           'email': username,
           'password': password,

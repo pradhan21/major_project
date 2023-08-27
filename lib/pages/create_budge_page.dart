@@ -38,12 +38,13 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
   // Define a list to store the categories
   List<Category> categories = [];
   List<ExpCategory> expcategories = [];
+  String scannedTotalAmount = '';
   late String categoryName;
   late int categoryId;
   @override
   void initState() {
     super.initState();
-    // loadCamera();
+    loadCamera();
     // Call the fetchCategories function and store the result in the 'categories' list
     fetchCategories(widget.accessToken).then((fetchedCategories) {
       setState(() {
@@ -100,42 +101,52 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
       print("Permission not granted");
     }
   }
-
+  int _cameraOcr = FlutterMobileVision.CAMERA_BACK;
   _startScan() async {
-    try {
-      List<OcrText> list = await FlutterMobileVision.read(
-        waitTap: true,
-        fps: 5,
-      );
+  try {
+    List<OcrText> list = await FlutterMobileVision.read(
+      waitTap: true,
+      camera: _cameraOcr,
+      fps: 5,
+    );
 
-      // Process the OCR results and extract the billing information
-      String? billingInfo;
-      for (OcrText text in list) {
-        if (text.value.toLowerCase().contains('total') ||
-            text.value.toLowerCase().contains('amount') ||
-            text.value.toLowerCase().contains('balance')) {
-          // Extract the billing information from the OCR text
-          billingInfo = text.value;
+    // Process the OCR results and extract the last amount
+    String? totalAmount;
+    for (int i = list.length - 1; i >= 0; i--) {
+      OcrText text = list[i];
+      List<String> words = text.value.split(' ');
+      for (int j = words.length - 1; j >= 0; j--) {
+        String word = words[j];
+        if (word.contains(RegExp(r'\d+(?:,\d+)?'))) {
+          // Extract the last amount using regular expression
+          totalAmount = word.replaceAll(',', '');
           break;
         }
       }
-
-      if (billingInfo != null) {
-        // Do something with the billing information
-        print('Billing Information: $billingInfo');
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ScannedValuesPage(scannedValues: list),
-          ),
-        );
-      } else {
-        print('Billing Information not found');
+      if (totalAmount != null) {
+        break;
       }
-    } catch (e) {
-      print('Error: $e');
     }
+
+    if (totalAmount != null) {
+      String lastDigits = totalAmount.replaceAll(RegExp(r'[^0-9]'), '');
+       _budgetPriceexp.text = lastDigits;
+      // Do something with the total amount
+      print('Total Amount: $totalAmount');
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => ScannedValuesPage(scannedValues: list),
+      //   ),
+      // );
+    } else {
+      print('Total Amount not found');
+    }
+  } catch (e) {
+    print('Error: $e');
   }
+}
+
 
   void _addCategory() {
     Navigator.push(
@@ -152,7 +163,7 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
 
 /////api to get list of category////////////////////////////////////////////////////////////////////
   Future<List<Category>> fetchCategories(String accessToken) async {
-    final url = 'http://10.0.2.2:8000/incomeCat/incomecategory/';
+    final url = 'http://192.168.203.233:8000/incomeCat/incomecategory/';
 
     final response = await http.get(Uri.parse(url), headers: {
       'Authorization': 'Bearer $accessToken',
@@ -177,7 +188,7 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
 
 ////////api integration for fetching the category lists//////////////////////////////////////////////
   Future<List<ExpCategory>> fetchexpCategories(String accessToken) async {
-    const url = 'http://10.0.2.2:8000/expensesCat/excategory/';
+    const url = 'http://192.168.203.233:8000/expensesCat/excategory/';
 
     final response = await http.get(Uri.parse(url), headers: {
       'Authorization': 'Bearer $accessToken',
@@ -204,7 +215,7 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
 ////////////////////////////////////api to add new income/////////////////////////////////////////////////////////
   void createIncome(String budgetName, String budgetPrice, int category) async {
     final url =
-        'http://10.0.2.2:8000/income/income/'; // Update with the correct API endpoint
+        'http://192.168.203.233:8000/income/income/'; // Update with the correct API endpoint
 
     // Replace 'accessToken' with your actual access token
     final headers = {'Authorization': 'Bearer ${widget.accessToken}'};
@@ -235,7 +246,7 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
   void createexpenses(
       String expname, String expprice, String note, int category) async {
     final url =
-        'http://10.0.2.2:8000/expenses/expenses/'; // Update with the correct API endpoint
+        'http://192.168.203.233:8000/expenses/expenses/'; // Update with the correct API endpoint
 
     // Replace 'accessToken' with your actual access token
     final headers = {'Authorization': 'Bearer ${widget.accessToken}'};
@@ -648,10 +659,10 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
                               fontWeight: FontWeight.bold,
                               color: black),
                         ),
-                        // IconButton(
-                        //   icon: const Icon(AntDesign.scan1),
-                        //   onPressed: _startScan,
-                        // ),
+                        IconButton(
+                          icon: const Icon(AntDesign.scan1),
+                          onPressed: _startScan,
+                        ),
                       ],
                     ),
                   ],
@@ -849,12 +860,15 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
                               controller: _budgetPriceexp,
                               cursorColor: black,
                               style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
-                                  color: black),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                                color: black,
+                              ),
                               decoration: InputDecoration(
-                                  hintText: "Enter Budget",
-                                  border: InputBorder.none),
+                                hintText: "Enter Budget",
+                                border: InputBorder.none,
+                              ),
+                              
                             ),
                           ],
                         ),
@@ -900,7 +914,7 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
   }
 
   Future<http.Response> _createCategory(String name, String accessToken) async {
-    final url = Uri.parse('http://10.0.2.2:8000/expensesCat/excategory/');
+    final url = Uri.parse('http://192.168.203.233:8000/expensesCat/excategory/');
     final headers = {
       'Authorization': 'Bearer $accessToken',
       'Content-type': 'application/json',
@@ -917,7 +931,7 @@ class _BudgetAddPageState extends State<CreatBudgetPage> {
 
   Future<void> _createIncome(String name, String accessToken) async {
     final url = Uri.parse(
-        'http://10.0.2.2:8000/incomeCat/incomecategory/'); // Update the URL here
+        'http://192.168.203.233:8000/incomeCat/incomecategory/'); // Update the URL here
     final headers = {
       'Authorization': 'Bearer $accessToken',
       'Content-type': 'application/json',
